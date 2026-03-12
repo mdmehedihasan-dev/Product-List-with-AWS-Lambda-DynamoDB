@@ -1,168 +1,249 @@
-# BongoCommerce Frontend
+# Product List with AWS Lambda & DynamoDB
 
-A modern e-commerce frontend built with **React**, **Vite**, and **Tailwind CSS**, connected to an **AWS Lambda backend** for CRUD operations on products.
+A modern **serverless product management application** built with **React, Vite, Tailwind CSS, AWS Lambda, and Amazon DynamoDB**.
 
----
-
-## Features
-
-- Create, view, and delete products
-- Responsive UI with Tailwind CSS
-- Single AWS Lambda CRUD backend
-- Stores Lambda URL in `.env` file for easy configuration
-- Instant UI updates without page reloads
+The frontend communicates directly with an AWS Lambda function through a **Lambda Function URL**, allowing users to create, view, and delete products without running a traditional backend server.
 
 ---
 
-## Prerequisites
+# Tech Stack
 
-- Node.js >= **v24.12.0**
-- npm >= **10.x** (comes with Node 24)
-- AWS Lambda URL for your backend (single CRUD Lambda)
+### Frontend
+
+* React
+* Vite
+* Tailwind CSS
+
+### Backend
+
+* AWS Lambda
+* Amazon DynamoDB
+
+### Infrastructure
+
+* AWS Lambda Function URL
+* Environment variables (.env)
 
 ---
 
-## Folder Structure
+# Features
 
+* Add new products
+* View product list
+* Delete products
+* Responsive UI with Tailwind CSS
+* Serverless backend architecture
+* Instant UI updates without page reload
 
-```bash
-BongoCommerce/frontend/
-                    ├─ .env
-                    ├─ package.json
-                    ├─ vite.config.mjs
-                    ├─ postcss.config.js
-                    ├─ tailwind.config.js
-                    ├─ vite.config.mjs
-                    ├─ index.html
-                    ├─ src/
-                    │ ├─ main.jsx
-                    │ ├─ index.css
-                    │ ├─ App.jsx
-                    │ └─ components/
-                    │ ├─ ProductForm.jsx
-                    │ └─ ProductList.jsx
+---
+
+# Project Structure
+
+```
+ProductList/
+│
+├── frontend/
+│   ├── .env
+│   ├── package.json
+│   ├── vite.config.mjs
+│   ├── tailwind.config.js
+│   ├── postcss.config.js
+│   ├── index.html
+│   └── src/
+│       ├── main.jsx
+│       ├── index.css
+│       ├── App.jsx
+│       └── components/
+│           ├── ProductForm.jsx
+│           └── ProductList.jsx
+│
+└── backend/
+    ├── lambda.js
+    ├── package.json
+    └── node_modules/
 ```
 
 ---
 
-## Step 1 — Clone the Repository
+# Frontend Setup
 
-```bash
+### 1. Clone Repository
+
+```
 git clone <your-github-repo-url>
-cd BongoCommerce
-cd frontend
-```
-## Step 2 — Create .env File
-
-Create a .env file in the root directory:
-```bash 
-touch .env
+cd ProductList/frontend
 ```
 
-Add your AWS Lambda URL:
-```bash 
-VITE_LAMBDA_URL=https://your-lambda-url.amazonaws.com
-```
-Replace https://your-lambda-url.amazonaws.com with your real Lambda URL.
+### 2. Create Environment File
 
-## Step 3 — Install Dependencies
-```bash 
+Create a `.env` file inside the frontend directory:
+
+```
+VITE_LAMBDA_URL=https://your-lambda-url.on.aws/
+```
+
+Replace the value with your **AWS Lambda Function URL**.
+
+### 3. Install Dependencies
+
+```
 npm install
 ```
 
+### 4. Run Development Server
 
+```
+npm run dev
+```
 
-# BongoCommerce Backend
+Open the app in your browser:
 
-## Create DynamoDB
+```
+http://localhost:5173
+```
 
-### DynamoDB Table Setup
+---
 
-**Table name:** BongoProducts
+# Backend Setup (AWS)
 
-**Partition key:** productId (String)
+## 1. Create DynamoDB Table
 
-No sort key needed
+Create a table in **Amazon DynamoDB** with the following configuration:
 
-Enable On-Demand capacity for simplicity.
+| Field         | Value              |
+| ------------- | ------------------ |
+| Table Name    | BongoProducts      |
+| Partition Key | productId (String) |
+| Capacity Mode | On-Demand          |
 
-## Create AWS Lambda Function
+---
 
-### Go to your backend directory 
-    
-    cd backend
+## 2. Create AWS Lambda Function
 
-## Make a zip file with node_modules, lambda.js, package.json
+Create a Lambda function with:
 
-```bash 
+Runtime:
+
+```
+Node.js 24.x
+```
+
+Handler:
+
+```
+lambda.handler
+```
+
+---
+
+## 3. Upload Backend Code
+
+Inside the backend folder create a deployment zip:
+
+```
 zip -r lambda.zip lambda.js package.json node_modules
 ```
 
-## In Lambda Function code → Upload the lambda.zip file containing:
+Upload the zip file to your Lambda function and click **Deploy**.
 
-```bash 
-lambda.js
+---
 
-node_modules/
+## 4. Configure IAM Role
 
-package.json
+Create a role with permissions:
+
+* AmazonDynamoDBFullAccess
+* CloudWatchLogsFullAccess
+
+Example role name:
+
+```
+ProductListLambdaRole
 ```
 
-```bash 
-Hit Deploy
+Attach this role to your Lambda function.
+
+---
+
+## 5. Create Lambda Function URL
+
+Go to:
+
+```
+Lambda → Function → Function URL → Create Function URL
 ```
 
-## AWS Lambda needs to work with DynamoDB
-<p>Allows Lambda functions to call AWS services (DynamoDB) on your behalf.</p>
+Settings:
 
-<strong> Create a role with DynamoDBFull Access and CloudWatchEventFull Access </strong>
-
-**Role Name:** BongoCommerceCRUDRole
-
-## Give the new role to Lambda Function
-
-Functions > BongoCommerceCRUD > Configuration > Permissions > Edit > Select the new role
-
-## Create Lambda Function URL
-
-### Function URL > Create function URL > Auth Type = None > Save
-
-Cpy the Function URL and paste it to your **.env** file
-
-```bash 
-VITE_LAMBDA_URL=FunctionURL
+```
+Auth Type: NONE
 ```
 
-Lambda Function > Runtime settings > Edit > Select Runtime = Node.js 24.x > Write Handler=lambda.handler
+Copy the URL and place it inside the `.env` file.
 
+Example:
 
-## If you want to Run on EC2 Machine:
+```
+VITE_LAMBDA_URL=https://abc123.lambda-url.us-east-1.on.aws/
+```
 
-### Install NodeJS
-### Download and install nvm:
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-### in lieu of restarting the shell
-    \. "$HOME/.nvm/nvm.sh"
-### Download and install Node.js:
-    nvm install 24
-### Verify the Node.js version:
-    node -v # Should print "v24.13.1".
-### Verify npm version:
-    npm -v # Should print "11.8.0".
+---
 
-## Clone Repo and Insall:
-```bash 
+# API Methods
+
+| Method | Description        |
+| ------ | ------------------ |
+| GET    | Fetch all products |
+| POST   | Create a product   |
+| DELETE | Delete a product   |
+
+---
+
+# Running on EC2 (Optional)
+
+### Install Node.js
+
+```
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+. "$HOME/.nvm/nvm.sh"
+
+nvm install 24
+node -v
+npm -v
+```
+
+### Clone Project
+
+```
 ssh -i your-key.pem ec2-user@EC2_PUBLIC_IP
 git clone <your-repo-url>
-cd frontend
+cd ProductList/frontend
 npm install
 ```
-### Run Vite Dev Server on EC2
-    npm run dev -- --host 0.0.0.0
 
-### Set Inbound rules:
+### Run Server
 
-    TCP 5173 → your IP (or 0.0.0.0/0 for testing)
+```
+npm run dev -- --host 0.0.0.0
+```
 
-### Access from your browser
-    http://EC2_PUBLIC_IP:5173
+Allow port **5173** in EC2 Security Group.
+
+Access:
+
+```
+http://EC2_PUBLIC_IP:5173
+```
+
+---
+
+# License
+
+MIT
+
+---
+
+# Author
+
+Md Mehedi Hasan
+Frontend Developer
