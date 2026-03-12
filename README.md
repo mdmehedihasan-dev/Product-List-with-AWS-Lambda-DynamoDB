@@ -112,7 +112,7 @@ Create a table in **Amazon DynamoDB** with the following configuration:
 
 | Field         | Value              |
 | ------------- | ------------------ |
-| Table Name    | BongoProducts      |
+| Table Name    | ProductsCart      |
 | Partition Key | productId (String) |
 | Capacity Mode | On-Demand          |
 
@@ -246,4 +246,4 @@ MIT
 # Author
 
 Md Mehedi Hasan
-Frontend Developer
+Full-Stack Developer & DevOps Enthusiast
